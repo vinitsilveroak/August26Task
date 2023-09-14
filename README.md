@@ -9,6 +9,34 @@
  
  Part 2: If I delete an Account then all its related Contacts should be deleted. If SkipContactCascadeDelete__c is true then no contact should be deleted when I delete the Account.   In the above trigger user proper names of variables, the Handler class.  
 
+ public class HAndlerAccountTriggerCon {
+        public static void preventDeleteOnAccount(List<Account> accountsToDelete) {	
+        Set<Id> accId = new Set<Id>();
+    	for(Account acc : accountsToDelete){
+        if(acc.SkipContactCascadeDelete__c){
+            accId.add(acc.id);
+        }
+       
+    }
+    
+    List<Contact> contactUpdate = [SELECT ID,AccountId from contact where id in:accId];
+    List<Contact> contact = new List<contact>();
+    for(Contact con : contactUpdate){
+        con.AccountId = null;
+    	contact.add(con);
+    }
+    
+    if(!contact.isEmpty()){
+    update contact;
+        }
+            
+     }
+
+}
+
+trigger AccountTriggerCon on Account (Before delete) {
+     HAndlerAccountTriggerCon.preventDeleteOnAccount(Trigger.old);
+}
 
  
  **TASK 2 : **
