@@ -8,7 +8,34 @@
  Part 1: Number of Active Contacts should be rolled up to Account. If an account has 10 contacts out of which 6 are active and 4 inactive then 6 should be rolled up to Account If I update one Contact to InActive then the count should be 5 and If I delete one Active Contact then the count should be 4 Now If I delete 1 inactive Contact then count should remain 4  
  
  Part 2: If I delete an Account then all its related Contacts should be deleted. If SkipContactCascadeDelete__c is true then no contact should be deleted when I delete the Account.   In the above trigger user proper names of variables, the Handler class.  
+public class HAndlerAccountTriggerCon {
+        public static void preventDeleteOnAccount(List<Account> accountsToDelete) {	
+        Set<Id> accId = new Set<Id>();
+    	for(Account acc : accountsToDelete){
+        if(acc.SkipContactCascadeDelete__c){
+            accId.add(acc.id);
+        }
+       
+    }
+    
+    List<Contact> contactUpdate = [SELECT ID,AccountId from contact where id in:accId];
+    List<Contact> contact = new List<contact>();
+    for(Contact con : contactUpdate){
+        con.AccountId = null;
+    	contact.add(con);
+    }
+    
+    if(!contact.isEmpty()){
+    update contact;
+        }
+            
+     }
 
+}
+
+trigger AccountTriggerCon on Account (Before delete) {
+     HAndlerAccountTriggerCon.preventDeleteOnAccount(Trigger.old);
+}
 
  
  **TASK 2 : **
